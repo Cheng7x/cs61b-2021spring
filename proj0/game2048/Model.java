@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author Cheng7x
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -93,7 +93,51 @@ public class Model extends Observable {
         checkGameOver();
         setChanged();
     }
+    public int singleColGoTo(int col, int row, int lastMergedRow) {
+        int targetRow = row;
+        Tile t = board.tile(col, row);
+        for (int r = row + 1; r < board.size(); r += 1) {
+            Tile curr = board.tile(col, r);
+            if (curr == null) {
+                targetRow = r;
+            }
+            else if (curr.value() == t.value()) {
+                if (lastMergedRow == r) {
+                    return targetRow;
+                }
+                else {
+                    return r;
+                }
+            }
+            else {
+                return targetRow;
+            }
+        }
+        return targetRow;
+    }
 
+    public boolean singleCol(int col) {
+        boolean changed = false;
+        int lastMergedRow = -1;
+        for (int row = board.size() - 2; row >= 0; row -= 1) {
+            Tile curr = board.tile(col, row);
+            if (curr == null) {
+                continue;
+            }
+            int goIndex = singleColGoTo(col, row, lastMergedRow);
+            if (goIndex == row) {
+                continue;
+            }
+            else {
+                if(board.move(col, goIndex, curr)) {
+                    lastMergedRow = goIndex;
+                    score += board.tile(col, goIndex).value();
+                };
+                changed = true;
+            }
+        }
+        return changed;
+    }
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
      * 1. If two Tile objects are adjacent in the direction of motion and have
@@ -109,11 +153,16 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        board.setViewingPerspective(side);
+        for (int col = 0; col < board.size(); col += 1) {
+            if (singleCol(col)) {
+                changed = true;
+            };
+        }
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,9 +187,15 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int col = 0; col < b.size(); col += 1) {
+            for (int row = 0; row < b.size(); row += 1) {
+                if (b.tile(col, row) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
-
     /**
      * Returns true if any tile is equal to the maximum valid value.
      * Maximum valid value is given by MAX_PIECE. Note that
@@ -148,6 +203,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int col = 0; col < b.size(); col += 1) {
+            for (int row = 0; row < b.size(); row += 1) {
+                if (b.tile(col, row) == null) {
+                    continue;
+                }
+                else if (b.tile(col, row).value() == MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +224,18 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) return true;
+        int N = b.size();
+        for (int col = 0; col < N; col += 1) {
+            for (int row = 0; row < N; row += 1) {
+                // 检查上方和右边
+                int rightcol = col + 1, uprow = row + 1;
+                if ((uprow < N && b.tile(col, row).value() == b.tile(col, uprow).value()) ||
+                    (rightcol < N && b.tile(col, row).value() == b.tile(rightcol, row).value())) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
