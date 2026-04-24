@@ -16,6 +16,10 @@ public class DebugExercise2 {
         return max;
     }
 
+    /** The max function is wrong and this is the correct. */
+    public static int trueMax(int a, int b) {
+        return Math.max(a, b);
+    }
 
     /** Returns the sum of a and b. Do not step into this function. */
     public static int add(int a, int b) {
@@ -46,7 +50,7 @@ public class DebugExercise2 {
         }
         int[] returnArray = new int[a.length];
         for (int i = 0; i < a.length; i += 1) {
-            int biggerValue = max(a[i], b[i]);
+            int biggerValue = trueMax(a[i], b[i]);
             returnArray[i] = biggerValue;
         }
 
@@ -58,7 +62,7 @@ public class DebugExercise2 {
         int i = 0;
         int sum = 0;
         while (i < x.length) {
-            sum = sum + add(sum, x[i]);
+            sum = add(sum, x[i]);
             i = i + 1;
         }
         return sum;
@@ -78,6 +82,8 @@ public class DebugExercise2 {
     public static void main(String[] args) {
         int[] a = {1, 11, -1, -11};
         int[] b = {3, -3, 2, -1};
+        // int[] a = {2, 0, 10, 14};
+        // int[] b = {-5, 5, 20, 30};
 
         int sumOfElementwiseMaxes = sumOfElementwiseMaxes(a, b);
         System.out.println(sumOfElementwiseMaxes);
