@@ -48,7 +48,7 @@ public class ArrayDeque<T> {
     }
 
     public T get(int index) {
-        int idx = (nextFirst + index) % items.length;
+        int idx = (nextFirst + 1 + index) % items.length;
         return items[idx];
     }
 
