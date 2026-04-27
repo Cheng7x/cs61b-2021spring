@@ -48,14 +48,17 @@ public class ArrayDeque<T> implements Deque<T> {
 //    }
 
     public T get(int index) {
+        if (index < 0 || index > this.size) {
+            return null;
+        }
         int idx = (nextFirst + 1 + index) % items.length;
         return items[idx];
     }
 
     public T removeFirst() {
+        nextFirst = plusOne(nextFirst);
         T val = items[nextFirst];
         items[nextFirst] = null;
-        nextFirst = plusOne(nextFirst);
         size -= 1;
         if (isNeedSmaller()) {
             resize(items.length / 4);
@@ -64,9 +67,9 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     public T removeLast() {
+        nextLast = minusOne(nextLast);
         T val = items[nextLast];
         items[nextLast] = null;
-        nextLast = minusOne(nextLast);
         size -= 1;
         if (isNeedSmaller()) {
             resize(items.length / 4);
@@ -95,7 +98,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     public void printDeque() {
         for (int i = 0; i < size; i += 1) {
-            System.out.print(items[i] + " ");
+            System.out.print(get(i) + " ");
         }
     }
 }
