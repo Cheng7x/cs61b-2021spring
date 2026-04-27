@@ -1,6 +1,6 @@
 package deque;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private T[] items;
     private int size;
     private int nextFirst;
@@ -43,9 +43,9 @@ public class ArrayDeque<T> {
         return size;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
 
     public T get(int index) {
         int idx = (nextFirst + 1 + index) % items.length;
