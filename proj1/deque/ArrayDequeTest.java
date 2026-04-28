@@ -37,4 +37,15 @@ public class ArrayDequeTest {
         assertEquals(5, (int) arr.get(5));
         assertEquals(8, (int) arr.get(8));
     }
+
+    public static void main(String[] args) {
+        int N = 10;
+        ArrayDeque<Integer> arr = new ArrayDeque<>();
+        for (int i = 128; i < 128 + N; i += 1) {
+            arr.addLast(i);
+        }
+        for (int i : arr) {
+            System.out.println(i);
+        }
+    }
 }

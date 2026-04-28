@@ -119,4 +119,15 @@ public class LinkedListDequeTest {
         }
 
     }
+
+    public static void main(String[] args) {
+        int N = 10;
+        LinkedListDeque<Integer> deque = new LinkedListDeque<>();
+        for (int i = 256; i < 256 + N; i += 1) {
+            deque.addLast(i);
+        }
+        for (int i : deque) {
+            System.out.println(i);
+        }
+    }
 }
