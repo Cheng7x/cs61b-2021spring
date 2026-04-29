@@ -61,8 +61,9 @@ public class Commit implements Serializable {
     public String generateID() {
         return Utils.sha1(this.message,
                 this.time.toString(),
-                this,parentID == null ? 0 : this.parentID,
-                this.blobs.isEmpty() ? 0 : this.blobs.toString());
+                this.parentID == null ? "null" : this.parentID,
+                this.blobs.toString()
+        );
     }
 
     public void saveCommit() {

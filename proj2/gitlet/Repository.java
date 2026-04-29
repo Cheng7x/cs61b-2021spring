@@ -23,12 +23,12 @@ public class Repository {
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
-    public static final File GITLET_DIR = join(CWD, ".gitlet");
-    public static final File COMMITS = join(GITLET_DIR, "commits");
-    public static final File BLOBS = join(GITLET_DIR, "blobs");
-    public static final File BRANCHES = join(GITLET_DIR, "branches");
-    public static final File STAGE = join(GITLET_DIR, "STAGE");
-    public static final File HEAD = join(GITLET_DIR, "HEAD");
+    public static final File GITLET_DIR = Utils.join(CWD, ".gitlet");
+    public static final File COMMITS = Utils.join(GITLET_DIR, "commits");
+    public static final File BLOBS = Utils.join(GITLET_DIR, "blobs");
+    public static final File BRANCHES = Utils.join(GITLET_DIR, "branches");
+    public static final File STAGE = Utils.join(GITLET_DIR, "STAGE");
+    public static final File HEAD = Utils.join(GITLET_DIR, "HEAD");
     /* TODO: fill in the rest of this class. */
     public static void setUpRepository() {
         if (GITLET_DIR.exists()) {
@@ -42,4 +42,12 @@ public class Repository {
         Commit initCommit = Commit.initCommit();
         initCommit.saveCommit();
     }
+
+    public static void newBranch(String name) {
+        File branch = Utils.join(BRANCHES, name);
+        branch.mkdir();
+        
+    }
+
+
 }
