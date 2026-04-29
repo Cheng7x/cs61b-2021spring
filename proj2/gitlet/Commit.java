@@ -58,16 +58,16 @@ public class Commit implements Serializable {
         return new TreeMap<>(this.blobs);
     }
 
-    public String generateID() {
-        return Utils.sha1(this.message,
-                this.time.toString(),
-                this.parentID == null ? "null" : this.parentID,
-                this.blobs.toString()
+    public static String generateID(Commit commit) {
+        return Utils.sha1(commit.message,
+                commit.time.toString(),
+                commit.parentID == null ? "null" : commit.parentID,
+                commit.blobs.toString()
         );
     }
 
     public void saveCommit() {
-        File newCommit = Utils.join(Repository.COMMITS, this.generateID());
+        File newCommit = Utils.join(Repository.COMMITS, generateID(initCommit()));
         Utils.writeObject(newCommit, Commit.class);
     }
 }

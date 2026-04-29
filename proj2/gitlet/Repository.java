@@ -27,27 +27,34 @@ public class Repository {
     public static final File COMMITS = Utils.join(GITLET_DIR, "commits");
     public static final File BLOBS = Utils.join(GITLET_DIR, "blobs");
     public static final File BRANCHES = Utils.join(GITLET_DIR, "branches");
-    public static final File STAGE = Utils.join(GITLET_DIR, "STAGE");
     public static final File HEAD = Utils.join(GITLET_DIR, "HEAD");
+    public static final String DEFAULT_BRANCH = "master";
     /* TODO: fill in the rest of this class. */
     public static void setUpRepository() {
         if (GITLET_DIR.exists()) {
             throw new GitletException("A Gitlet version-control system already exists in the current directory.");
         }
+        // Create folders
         GITLET_DIR.mkdir();
         COMMITS.mkdir();
         BLOBS.mkdir();
         BRANCHES.mkdir();
-
-        Commit initCommit = Commit.initCommit();
+        Commit initCommit = Commit.initCommit();    // Initialize commit
         initCommit.saveCommit();
+        newBranch(DEFAULT_BRANCH, initCommit);    // Initialize branch
+        setCurrentHead(DEFAULT_BRANCH);     // Initialize head
     }
 
-    public static void newBranch(String name) {
+    /** Create a new branch
+     *  @param name Name of the new branch
+     *  @param commit Commit which branch points to
+     *  */
+    public static void newBranch(String name, Commit commit) {
         File branch = Utils.join(BRANCHES, name);
-        branch.mkdir();
-        
+        Utils.writeContents(branch, Commit.generateID(commit));
     }
 
-
+    public static void setCurrentHead(String name) {
+        Utils.writeContents(HEAD, name);
+    }
 }
