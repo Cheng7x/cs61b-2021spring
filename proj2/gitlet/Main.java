@@ -20,11 +20,30 @@ public class Main {
                 // TODO: handle the `init` command
                 validateNumArgs(args, 1);
                 Repository.setUpRepository();
+                System.out.println("Your repository has initialized.");
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                validateNumArgs(args, 2);
+                String fileName = args[1];
+                Stage.addBlobs(fileName);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                // java gitlet.Main commit message;
+                validateNumArgs(args, 2);
+                String message = args[1];
+                Commit.newCommit(message);
+            // temp
+            case "temp":
+                // getInitCommit
+                Commit currCommit = Commit.getLatestCommit();
+                System.out.println(
+                        "===\n" +
+                        currCommit.getMessage() + "\n" +
+                        currCommit.getTime() + "\n" +
+                        currCommit.getBlobs()
+                );
+                break;
             default:
                 throw new GitletException("No command with that name exists.");
         }

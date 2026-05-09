@@ -28,6 +28,7 @@ public class Repository {
     public static final File BLOBS = Utils.join(GITLET_DIR, "blobs");
     public static final File BRANCHES = Utils.join(GITLET_DIR, "branches");
     public static final File HEAD = Utils.join(GITLET_DIR, "HEAD");
+    public static final File STAGE = Utils.join(GITLET_DIR, "STAGE");
     public static final String DEFAULT_BRANCH = "master";
     /* TODO: fill in the rest of this class. */
     public static void setUpRepository() {
@@ -51,7 +52,12 @@ public class Repository {
      *  */
     public static void newBranch(String name, Commit commit) {
         File branch = Utils.join(BRANCHES, name);
-        Utils.writeContents(branch, Commit.generateID(commit));
+        Utils.writeContents(branch, commit.generateID());
+    }
+
+    public static File getCurrentBranch() {
+        String currentBranchName = Utils.readContentsAsString(HEAD);
+        return Utils.join(BRANCHES, currentBranchName);
     }
 
     public static void setCurrentHead(String name) {

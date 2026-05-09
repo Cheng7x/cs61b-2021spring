@@ -5,6 +5,7 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.Map;
 import java.util.TreeMap;
 import gitlet.*;
 
@@ -42,6 +43,26 @@ public class Commit implements Serializable {
         this.blobs = new TreeMap<>(blobs);
     }
 
+    public static void newCommit(String message) {
+        if (Stage.isEmpty()) {
+            System.out.println("No changes added to the commit");
+            return;
+        }
+
+        Commit parent = getLatestCommit();
+        TreeMap<String, String> newBlobs = new TreeMap<>(parent.getBlobs());
+        for (String fileName : Stage.getAdditions().keySet()) {
+            newBlobs.put(fileName, Stage.getAdditions().get(fileName));
+        }
+
+        for (String fileName : Stage.getRemovals().keySet()) {
+            newBlobs.remove(fileName);
+        }
+
+        Commit currCommit = new Commit(message, parent.generateID(), newBlobs);
+        currCommit.saveCommit();
+    }
+
     public String getMessage() {
         return this.message;
     }
@@ -58,16 +79,22 @@ public class Commit implements Serializable {
         return new TreeMap<>(this.blobs);
     }
 
-    public static String generateID(Commit commit) {
-        return Utils.sha1(commit.message,
-                commit.time.toString(),
-                commit.parentID == null ? "null" : commit.parentID,
-                commit.blobs.toString()
+    public String generateID() {
+        return Utils.sha1(this.message,
+                this.time.toString(),
+                this.parentID == null ? "null" : this.parentID,
+                this.blobs.toString()
         );
     }
 
     public void saveCommit() {
-        File newCommit = Utils.join(Repository.COMMITS, generateID(initCommit()));
-        Utils.writeObject(newCommit, Commit.class);
+        File newCommit = Utils.join(Repository.COMMITS, this.generateID());
+        Utils.writeObject(newCommit, this);
+    }
+
+    public static Commit getLatestCommit() {
+        String commitID = Utils.readContentsAsString(Repository.getCurrentBranch());
+        File commitFile = Utils.join(Repository.COMMITS, commitID);
+        return Utils.readObject(commitFile, Commit.class);
     }
 }
