@@ -30,7 +30,7 @@ public class Repository {
     public static final File HEAD = Utils.join(GITLET_DIR, "HEAD");
     public static final File STAGE = Utils.join(GITLET_DIR, "STAGE");
     public static final String DEFAULT_BRANCH = "master";
-    /* TODO: fill in the rest of this class. */
+
     public static void setUpRepository() {
         if (GITLET_DIR.exists()) {
             throw new GitletException("A Gitlet version-control system already exists in the current directory.");
@@ -65,6 +65,10 @@ public class Repository {
 
     public static void setCurrentHead(String name) {
         Utils.writeContents(HEAD, name);
+    }
+
+    public static boolean isInitialized() {
+        return GITLET_DIR.exists();
     }
 
     public static void log() {
@@ -107,7 +111,6 @@ public class Repository {
 
         if (sameMessageCommits.isEmpty()) {
             System.out.println("Not found the commit.");
-            return;
         } else {
             for (String fileName : sameMessageCommits) {
                 File commitFile = Utils.join(COMMITS, fileName);
@@ -156,5 +159,74 @@ public class Repository {
             }
         }
         System.out.println("File do not exist.");
+    }
+
+    private static boolean isCurrentBranch(String branchName) {
+        return branchName.equals(Utils.readContentsAsString(HEAD));
+    }
+
+    public static void removeBranch(String branchName) {
+        File branchFile = Utils.join(BRANCHES, branchName);
+        if (!branchFile.exists()) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        }
+
+        if (isCurrentBranch(branchName)) {
+            System.out.println("Cannot remove the current branch.");
+            return;
+        }
+
+        Utils.join(BRANCHES, branchName).delete();
+        System.out.println("Removed successfully.");
+
+    }
+
+    public static void switchBranch(String branchName) {
+        File branchFile = Utils.join(BRANCHES, branchName);
+        Stage stage = Stage.getStage();
+
+        if (!branchFile.exists()) {
+            System.out.println("No such branch exists.");
+            return;
+        }
+
+        if (isCurrentBranch(branchName)) {
+            System.out.println("No need to checkout the current branch.");
+            return;
+        }
+
+        Commit currCommit = Commit.getLatestCommit();
+        String targetCommitID = Utils.readContentsAsString(branchFile);
+        Commit targetCommit = Commit.getCommitByID(targetCommitID);
+
+        // 检查有没有 untracked file
+        for (String fileName : Utils.plainFilenamesIn(CWD)) {
+            boolean trackedByCurrent = currCommit.getBlobs().containsKey(fileName);
+            boolean stagedForAdd = stage.getAdditions().containsKey(fileName);
+            boolean existsInTarget = targetCommit.getBlobs().containsKey(fileName);
+
+            if (!trackedByCurrent && !stagedForAdd && existsInTarget) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                return;
+            }
+        }
+
+        // 将目标 commit file 写到 working directory
+        for (String fileName : targetCommit.getBlobs().keySet()) {
+            String blobID = targetCommit.getBlobs().get(fileName);
+
+            byte[] content = Utils.readContents(Utils.join(BLOBS, blobID));
+            Utils.writeContents(Utils.join(CWD, fileName), (Object) content);
+        }
+
+        for (String fileName : currCommit.getBlobs().keySet()) {
+            if (!targetCommit.getBlobs().containsKey(fileName)) {
+                Utils.restrictedDelete(Utils.join(CWD, fileName));
+            }
+        }
+
+        stage.clearStage();
+        setCurrentHead(branchName);
     }
 }

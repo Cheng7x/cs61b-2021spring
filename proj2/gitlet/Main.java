@@ -71,11 +71,16 @@ public class Main {
             }
 
             case "checkout": {
+                if (!Repository.isInitialized()) {
+                    throw new GitletException("Incorrect operands.");
+                }
+
                 if (args.length == 3 && args[1].equals("--")) {
                     String fileName = args[2];
                     Repository.checkoutFile(Commit.getLatestCommit(), fileName);
                     break;
                 }
+
                 else if (args.length == 4 && args[2].equals("--")) {
                     String commitID = args[1];
                     String fileName = args[3];
@@ -87,6 +92,12 @@ public class Main {
                     }
                     break;
                 }
+
+                else if (args.length == 2) {
+                    String branchName = args[1];
+                    Repository.switchBranch(branchName);
+                    break;
+                }
             }
 
             case "branch": {
@@ -94,6 +105,13 @@ public class Main {
                 String branchName = args[1];
                 Repository.newBranch(branchName, Commit.getLatestCommit());
                 System.out.println("New branch created successfully.");
+                break;
+            }
+
+            case "rm-branch": {
+                validateNumArgs(args, 2);
+                String branchName = args[1];
+                Repository.removeBranch(branchName);
                 break;
             }
 

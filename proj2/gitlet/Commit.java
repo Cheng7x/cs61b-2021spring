@@ -60,7 +60,6 @@ public class Commit implements Serializable {
         }
 
         stage.clearStage();
-        stage.saveStage();
 
         Commit currCommit = new Commit(message, parent.generateID(), newBlobs);
         currCommit.saveCommit();
@@ -106,15 +105,6 @@ public class Commit implements Serializable {
                 "Date: " + this.getTime() + "\n" +
                 this.message + "\n"
         );
-
-        /*
-        StringJoiner fileNameSet = new StringJoiner(", ");
-        for (String fileName : this.getBlobs().keySet()) {
-            fileNameSet.add(fileName);
-        }
-        System.out.println(fileNameSet + "\n" + "===\n");
-        */
-
     }
 
     public static Commit getLatestCommit() {
