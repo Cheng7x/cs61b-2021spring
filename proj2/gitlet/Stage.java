@@ -2,20 +2,21 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 public class Stage implements Serializable {
-    private static TreeMap<String, String> additions;
-    private static TreeMap<String, String> removals;
+    // key: fileName; value: sha1Code
+    private TreeMap<String, String> additions = new TreeMap<>();
+    private HashSet<String> removals = new HashSet<>();
 
-    public static void initStage() {
-        // key: fileName; value: sha1Code
-        additions = null;
-        removals = null;
-        // Utils.writeObject();
+    public Stage() {}
+
+    public static Stage getStage() {
+        return Utils.readObject(Repository.STAGE, Stage.class);
     }
 
-    public static void addBlobs(String fileName) {
+    public void addBlobs(String fileName) {
         File workingFile = Utils.join(Repository.CWD, fileName);
         // 判断文件是否存在
         if (!workingFile.exists()) {
@@ -39,34 +40,42 @@ public class Stage implements Serializable {
             Utils.writeContents(blobFile, (Object) content);
         }
         additions.put(fileName, blobID);
+        saveStage();
     }
 
-    public static void removeBlobs(String fileName) {
+    public void removeBlobs(String fileName) {
         File workingFile = Utils.join(Repository.CWD, fileName);
         byte[] content = Utils.readContents(workingFile);
         String blobID = Utils.sha1((Object) content);
-        File blobFile = Utils.join(Repository.BLOBS, blobID);
-        if (additions.containsKey(fileName)) {
-            additions.remove(fileName);
-        } else {
-            removals.put(fileName, blobID);
+        // 如果当前文件在 additions 中则取消
+        additions.remove(fileName);
+        // 如果当前文件被 lastest Commit 追踪 则取消追踪
+        Commit headCommit = Commit.getLatestCommit();
+        if (headCommit.getBlobs().containsKey(fileName)) {
+            removals.add(fileName);
         }
+        Utils.restrictedDelete(workingFile);
+        saveStage();
     }
 
-    public static void clearStage() {
+    public void saveStage() {
+        Utils.writeObject(Repository.STAGE, this);
+    }
+
+    public void clearStage() {
         additions.clear();
         removals.clear();
     }
 
-    public static boolean isEmpty() {
+    public boolean isEmpty() {
         return additions.isEmpty() && removals.isEmpty();
     }
 
-    public static TreeMap<String, String> getAdditions() {
+    public TreeMap<String, String> getAdditions() {
         return additions;
     }
 
-    public static TreeMap<String, String> getRemovals() {
+    public HashSet<String> getRemovals() {
         return removals;
     }
 }

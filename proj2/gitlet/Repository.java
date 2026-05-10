@@ -1,6 +1,10 @@
 package gitlet;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -40,8 +44,11 @@ public class Repository {
         COMMITS.mkdir();
         BLOBS.mkdir();
         BRANCHES.mkdir();
+
+        Stage stage = new Stage();
+        stage.saveStage();
+
         Commit initCommit = Commit.initCommit();    // Initialize commit
-        initCommit.saveCommit();
         newBranch(DEFAULT_BRANCH, initCommit);    // Initialize branch
         setCurrentHead(DEFAULT_BRANCH);     // Initialize head
     }
@@ -62,5 +69,55 @@ public class Repository {
 
     public static void setCurrentHead(String name) {
         Utils.writeContents(HEAD, name);
+    }
+
+    public static void log() {
+        Commit currCommit = Commit.getLatestCommit();
+        String parentID = currCommit.getParentID();
+        while (parentID != null) {
+            currCommit.printCommit();
+
+            File currCommitFile = Utils.join(COMMITS, parentID);
+            currCommit = Utils.readObject(currCommitFile, Commit.class);
+            parentID = currCommit.getParentID();
+        }
+    }
+
+    public static void globalLog() {
+        List<String> commits = Utils.plainFilenamesIn(COMMITS);
+        if (commits == null || commits.size() <= 1) return;
+        for (String fileName : commits) {
+            File commitFile = Utils.join(COMMITS, fileName);
+            Commit commit = Utils.readObject(commitFile, Commit.class);
+            if (commit.getParentID() != null) {
+                commit.printCommit();
+            }
+        }
+    }
+
+    public static void findMessage(String message) {
+        Commit currCommit = Commit.getLatestCommit();
+        String parentID = currCommit.getParentID();
+        Set<String> sameMessageCommits = new HashSet<>();
+        while (parentID != null) {
+            if (currCommit.getMessage().equals(message)) {
+                sameMessageCommits.add(currCommit.generateID());
+            }
+
+            File currCommitFile = Utils.join(COMMITS, parentID);
+            currCommit = Utils.readObject(currCommitFile, Commit.class);
+            parentID = currCommit.getParentID();
+        }
+
+        if (sameMessageCommits.isEmpty()) {
+            System.out.println("Not found the commit.");
+            return;
+        } else {
+            for (String fileName : sameMessageCommits) {
+                File commitFile = Utils.join(COMMITS, fileName);
+                Commit commit = Utils.readObject(commitFile, Commit.class);
+                commit.printCommit();
+            }
+        }
     }
 }

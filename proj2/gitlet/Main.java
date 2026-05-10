@@ -1,7 +1,7 @@
 package gitlet;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Cheng7x
  */
 public class Main {
 
@@ -16,34 +16,60 @@ public class Main {
 
         String firstArg = args[0];
         switch(firstArg) {
-            case "init":
-                // TODO: handle the `init` command
+            case "init": {
                 validateNumArgs(args, 1);
                 Repository.setUpRepository();
                 System.out.println("Your repository has initialized.");
                 break;
-            case "add":
-                // TODO: handle the `add [filename]` command
+            }
+
+            case "add": {
                 validateNumArgs(args, 2);
                 String fileName = args[1];
-                Stage.addBlobs(fileName);
+                Stage.getStage().addBlobs(fileName);
                 break;
-            case "commit":
+            }
+
+            case "rm": {
+                validateNumArgs(args, 2);
+                String fileName = args[1];
+                Stage.getStage().removeBlobs(fileName);
+                break;
+            }
+
+            case "commit": {
                 // java gitlet.Main commit message;
                 validateNumArgs(args, 2);
                 String message = args[1];
                 Commit.newCommit(message);
-            // temp
-            case "temp":
-                // getInitCommit
-                Commit currCommit = Commit.getLatestCommit();
-                System.out.println(
-                        "===\n" +
-                        currCommit.getMessage() + "\n" +
-                        currCommit.getTime() + "\n" +
-                        currCommit.getBlobs()
-                );
                 break;
+            }
+
+            case "log": {
+                validateNumArgs(args, 1);
+                Repository.log();
+                break;
+            }
+
+            case "global-log": {
+                validateNumArgs(args, 1);
+                Repository.globalLog();
+                break;
+            }
+
+            case "find": {
+                validateNumArgs(args, 2);
+                String message = args[1];
+                Repository.findMessage(message);
+                break;
+            }
+
+            case "status": {
+                validateNumArgs(args, 1);
+                
+                break;
+            }
+
             default:
                 throw new GitletException("No command with that name exists.");
         }

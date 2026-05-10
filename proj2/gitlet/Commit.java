@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import gitlet.*;
 
@@ -33,6 +34,7 @@ public class Commit implements Serializable {
     public static Commit initCommit() {
         Commit initialCommit = new Commit("initial commit", null, new TreeMap<>());
         initialCommit.time = new Date(0);
+        initialCommit.saveCommit();
         return initialCommit;
     }
 
@@ -44,23 +46,29 @@ public class Commit implements Serializable {
     }
 
     public static void newCommit(String message) {
-        if (Stage.isEmpty()) {
+        Stage stage = Stage.getStage();
+        if (stage.isEmpty()) {
             System.out.println("No changes added to the commit");
             return;
         }
 
         Commit parent = getLatestCommit();
         TreeMap<String, String> newBlobs = new TreeMap<>(parent.getBlobs());
-        for (String fileName : Stage.getAdditions().keySet()) {
-            newBlobs.put(fileName, Stage.getAdditions().get(fileName));
+        for (String fileName : stage.getAdditions().keySet()) {
+            newBlobs.put(fileName, stage.getAdditions().get(fileName));
         }
 
-        for (String fileName : Stage.getRemovals().keySet()) {
+        for (String fileName : stage.getRemovals()) {
             newBlobs.remove(fileName);
         }
 
+        stage.clearStage();
+
         Commit currCommit = new Commit(message, parent.generateID(), newBlobs);
         currCommit.saveCommit();
+
+        File currentBranch = Repository.getCurrentBranch();
+        Utils.writeContents(currentBranch, currCommit.generateID());
     }
 
     public String getMessage() {
@@ -90,6 +98,19 @@ public class Commit implements Serializable {
     public void saveCommit() {
         File newCommit = Utils.join(Repository.COMMITS, this.generateID());
         Utils.writeObject(newCommit, this);
+    }
+
+    public void printCommit() {
+        System.out.print("===\n" +
+                "Message: " + this.getMessage() + "\n" +
+                "Time: " + this.getTime() + "\n" +
+                "Tracking: "
+        );
+        StringJoiner fileNameSet = new StringJoiner(", ");
+        for (String fileName : this.getBlobs().keySet()) {
+            fileNameSet.add(fileName);
+        }
+        System.out.println(fileNameSet + "\n" + "===\n");
     }
 
     public static Commit getLatestCommit() {
