@@ -4,10 +4,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.Map;
-import java.util.StringJoiner;
-import java.util.TreeMap;
+import java.util.*;
 import gitlet.*;
 
 /** Represents a gitlet commit object.
@@ -63,12 +60,15 @@ public class Commit implements Serializable {
         }
 
         stage.clearStage();
+        stage.saveStage();
 
         Commit currCommit = new Commit(message, parent.generateID(), newBlobs);
         currCommit.saveCommit();
 
         File currentBranch = Repository.getCurrentBranch();
         Utils.writeContents(currentBranch, currCommit.generateID());
+
+        System.out.println("Commit successfully.");
     }
 
     public String getMessage() {
@@ -101,21 +101,45 @@ public class Commit implements Serializable {
     }
 
     public void printCommit() {
-        System.out.print("===\n" +
-                "Message: " + this.getMessage() + "\n" +
-                "Time: " + this.getTime() + "\n" +
-                "Tracking: "
+        System.out.println("===\n" +
+                "commit " + this.generateID() + "\n" +
+                "Date: " + this.getTime() + "\n" +
+                this.message + "\n"
         );
+
+        /*
         StringJoiner fileNameSet = new StringJoiner(", ");
         for (String fileName : this.getBlobs().keySet()) {
             fileNameSet.add(fileName);
         }
         System.out.println(fileNameSet + "\n" + "===\n");
+        */
+
     }
 
     public static Commit getLatestCommit() {
         String commitID = Utils.readContentsAsString(Repository.getCurrentBranch());
         File commitFile = Utils.join(Repository.COMMITS, commitID);
+        return Utils.readObject(commitFile, Commit.class);
+    }
+
+    public static Commit getCommitByID(String hashID) {
+        List<String> commitIDs = Utils.plainFilenamesIn(Repository.COMMITS);
+        String matchID = null;
+        for (String fullID : commitIDs) {
+            if (fullID.startsWith(hashID)) {
+                if (matchID != null) {
+                    return null;
+                }
+                matchID = fullID;
+            }
+        }
+
+        if (matchID == null) {
+            return null;
+        }
+
+        File commitFile = Utils.join(Repository.COMMITS, matchID);
         return Utils.readObject(commitFile, Commit.class);
     }
 }

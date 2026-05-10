@@ -41,6 +41,8 @@ public class Stage implements Serializable {
         }
         additions.put(fileName, blobID);
         saveStage();
+
+        System.out.println(fileName + " added successfully.");
     }
 
     public void removeBlobs(String fileName) {
@@ -56,6 +58,8 @@ public class Stage implements Serializable {
         }
         Utils.restrictedDelete(workingFile);
         saveStage();
+
+        System.out.println(fileName + " removed successfully.");
     }
 
     public void saveStage() {

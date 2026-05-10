@@ -66,7 +66,34 @@ public class Main {
 
             case "status": {
                 validateNumArgs(args, 1);
-                
+                Repository.status();
+                break;
+            }
+
+            case "checkout": {
+                if (args.length == 3 && args[1].equals("--")) {
+                    String fileName = args[2];
+                    Repository.checkoutFile(Commit.getLatestCommit(), fileName);
+                    break;
+                }
+                else if (args.length == 4 && args[2].equals("--")) {
+                    String commitID = args[1];
+                    String fileName = args[3];
+                    Commit currCommit = Commit.getCommitByID(commitID);
+                    if (currCommit != null) {
+                        Repository.checkoutFile(currCommit, fileName);
+                    } else {
+                        System.out.println("Commit does not exist or not unique.");
+                    }
+                    break;
+                }
+            }
+
+            case "branch": {
+                validateNumArgs(args, 2);
+                String branchName = args[1];
+                Repository.newBranch(branchName, Commit.getLatestCommit());
+                System.out.println("New branch created successfully.");
                 break;
             }
 

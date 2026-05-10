@@ -1,11 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static gitlet.Utils.*;
+import java.util.*;
 
 // TODO: any imports you need here
 
@@ -119,5 +115,46 @@ public class Repository {
                 commit.printCommit();
             }
         }
+    }
+
+    public static void status() {
+        List<String> branches = Utils.plainFilenamesIn(BRANCHES);
+        String currBranch = Utils.readContentsAsString(HEAD);
+        if (branches == null) return;
+        for (String branchName : branches) {
+            if (branchName.equals(currBranch)) {
+                System.out.print("*");
+            }
+            System.out.println(branchName);
+        }
+
+        Stage stage = Stage.getStage();
+        System.out.println("=== Staged Files ===");
+        for (String fileName : stage.getAdditions().keySet()) {
+            System.out.println(fileName);
+        }
+        System.out.println();
+
+        List<String> removeFiles = new ArrayList<>(stage.getRemovals());
+        Collections.sort(removeFiles);
+        System.out.println("=== Removed Files ===");
+        for (String fileName : removeFiles) {
+            System.out.println(fileName);
+        }
+        System.out.println();
+    }
+
+    public static void checkoutFile(Commit currCommit, String fileName) {
+        for (String name : currCommit.getBlobs().keySet()) {
+            if (name.equals(fileName)) {
+                File checkOutFile = Utils.join(Repository.BLOBS, currCommit.getBlobs().get(fileName));
+                File newWorkingFile = Utils.join(Repository.CWD, fileName);
+                byte[] content = Utils.readContents(checkOutFile);
+                Utils.writeContents(newWorkingFile, (Object) content);
+                System.out.println("File modified successfully.");
+                return;
+            }
+        }
+        System.out.println("File do not exist.");
     }
 }
