@@ -69,7 +69,7 @@ public class Stage implements Serializable {
     public void clearStage() {
         additions.clear();
         removals.clear();
-        saveStage();
+        this.saveStage();
     }
 
     public boolean isEmpty() {

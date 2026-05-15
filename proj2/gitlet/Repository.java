@@ -147,6 +147,7 @@ public class Repository {
         System.out.println();
     }
 
+    // checkout -- fileName 恢复文件
     public static void checkoutFile(Commit currCommit, String fileName) {
         for (String name : currCommit.getBlobs().keySet()) {
             if (name.equals(fileName)) {
@@ -182,19 +183,25 @@ public class Repository {
 
     }
 
-    public static void switchBranch(String branchName) {
+    public static boolean safeCheckForSwitchBranch(String branchName) {
         File branchFile = Utils.join(BRANCHES, branchName);
-        Stage stage = Stage.getStage();
 
         if (!branchFile.exists()) {
             System.out.println("No such branch exists.");
-            return;
+            return false;
         }
 
         if (isCurrentBranch(branchName)) {
             System.out.println("No need to checkout the current branch.");
-            return;
+            return false;
         }
+
+        return true;
+    }
+
+    public static void switchBranch(String branchName) {
+        File branchFile = Utils.join(BRANCHES, branchName);
+        Stage stage = Stage.getStage();
 
         Commit currCommit = Commit.getLatestCommit();
         String targetCommitID = Utils.readContentsAsString(branchFile);
@@ -227,6 +234,5 @@ public class Repository {
         }
 
         stage.clearStage();
-        setCurrentHead(branchName);
     }
 }

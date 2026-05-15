@@ -95,9 +95,18 @@ public class Main {
 
                 else if (args.length == 2) {
                     String branchName = args[1];
+                    if (!Repository.safeCheckForSwitchBranch(branchName)) break;
                     Repository.switchBranch(branchName);
+                    Repository.setCurrentHead(branchName);
                     break;
                 }
+            }
+
+            case "reset" : {
+                validateNumArgs(args, 2);
+                String commitID = args[1];
+                Commit currCommit = Commit.getCommitByID(commitID);
+
             }
 
             case "branch": {
